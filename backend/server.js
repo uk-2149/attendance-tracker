@@ -6,7 +6,10 @@ const path = require('path')
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: 'https://attendance-tracker-pl45.onrender.com',
+    credentials: true,
+  }));
 
 //error in dotenv
 console.log("MongoDB URI:", process.env.MONGODB_URL);

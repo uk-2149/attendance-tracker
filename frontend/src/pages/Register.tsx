@@ -39,7 +39,7 @@ const RegisterForm: React.FC<RegisterProps> = ({ setToken }) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const res = await axios.post<{ token: string }>("http://localhost:5000/api/auth/register", {
+      const res = await axios.post<{ token: string }>("https://attendance-tracker-pl45.onrender.com/api/auth/register", {
         email,
         password,
       });

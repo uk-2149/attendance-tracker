@@ -49,7 +49,7 @@ const SubjectCard: React.FC<SubjectCardProps> = ({ subject, token, setSubjects }
             }
 
             const res = await axios.put(
-                `http://localhost:5000/api/subjects/${_id}`,
+                `https://attendance-tracker-pl45.onrender.com/api/subjects/${_id}`,
                 { attendedClasses: updatedAttendedClasses, missedClasses: updatedMissedClasses },
                 {
                     headers: { 'x-auth-token': token },

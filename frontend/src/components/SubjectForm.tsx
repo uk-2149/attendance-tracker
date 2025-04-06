@@ -59,7 +59,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ token, setSubjects, onBack })
           return;
         }
   
-        const res = await axios.post('http://localhost:5000/api/subjects', formData, {
+        const res = await axios.post('https://attendance-tracker-pl45.onrender.com/api/subjects', formData, {
           headers: { 'x-auth-token': token },
         });
         setSubjects((prev) => [...prev, res.data]);

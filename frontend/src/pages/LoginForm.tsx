@@ -34,7 +34,7 @@ const LoginForm: React.FC<LoginProps> = ({ setToken }) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const res = await axios.post<{ token: string }>("http://localhost:5000/api/auth/login", {
+      const res = await axios.post<{ token: string }>("https://attendance-tracker-pl45.onrender.com/api/auth/login", {
         email,
         password,
       });

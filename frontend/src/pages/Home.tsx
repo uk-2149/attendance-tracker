@@ -41,7 +41,7 @@ const Home: React.FC<HomeProps> = ({ token }) => {
           }
         
           const res = await axios.get(
-            `http://localhost:5000/api/subjects/`, 
+            `https://attendance-tracker-pl45.onrender.com/api/subjects/`, 
             { headers: {'x-auth-token': token} });
           setSubjects(res.data as Subject[]);
         } catch(err: any) {
