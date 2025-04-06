@@ -19,13 +19,12 @@ mongoose.connect(process.env.MONGODB_URL)
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/subjects', require('./routes/subjects'));
 
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../frontend/dist')));
-  
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html'));
-    });
-  }
+const frontendPath = path.join(__dirname, '..', 'frontend', 'dist'); // assuming Vite
+app.use(express.static(frontendPath));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running at port ${PORT}`));
