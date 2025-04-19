@@ -44,6 +44,8 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ token, setSubjects, onBack })
     });
   
     const toast = useToast();
+
+    const apiUrl = import.meta.env.VITE_BACKEND_URL;
   
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -59,7 +61,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ token, setSubjects, onBack })
           return;
         }
   
-        const res = await axios.post('https://attendance-tracker-pl45.onrender.com/api/subjects', formData, {
+        const res = await axios.post(`${apiUrl}/api/subjects`, formData, {
           headers: { 'x-auth-token': token },
         });
         setSubjects((prev) => [...prev, res.data]);

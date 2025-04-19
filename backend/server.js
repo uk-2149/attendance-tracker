@@ -12,8 +12,8 @@ app.use(cors({
   }));
 
 //error in dotenv
-console.log("MongoDB URI:", process.env.MONGODB_URL);
-console.log("JWT URI:", process.env.JWT_SECRET);
+// console.log("MongoDB URI:", process.env.MONGODB_URL);
+// console.log("JWT URI:", process.env.JWT_SECRET);
 
 mongoose.connect(process.env.MONGODB_URL)
 .then(() => console.log('MongoDB connected'))

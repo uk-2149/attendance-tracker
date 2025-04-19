@@ -33,6 +33,8 @@ const SubjectCard: React.FC<SubjectCardProps> = ({ subject, token, setSubjects }
 
     const toast = useToast();
 
+    const apiUrl = import.meta.env.VITE_BACKEND_URL;
+
     const updateAttendance = async (attended: boolean) => {
         const updatedAttendedClasses = attended ? attendedClasses + 1 : attendedClasses;
         const updatedMissedClasses = attended ? missedClasses : missedClasses + 1;
@@ -49,7 +51,7 @@ const SubjectCard: React.FC<SubjectCardProps> = ({ subject, token, setSubjects }
             }
 
             const res = await axios.put(
-                `https://attendance-tracker-pl45.onrender.com/api/subjects/${_id}`,
+                `${apiUrl}/api/subjects/${_id}`,
                 { attendedClasses: updatedAttendedClasses, missedClasses: updatedMissedClasses },
                 {
                     headers: { 'x-auth-token': token },

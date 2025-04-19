@@ -31,10 +31,12 @@ const LoginForm: React.FC<LoginProps> = ({ setToken }) => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
+  const apiUrl = import.meta.env.VITE_BACKEND_URL;
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const res = await axios.post<{ token: string }>("https://attendance-tracker-pl45.onrender.com/api/auth/login", {
+      const res = await axios.post<{ token: string }>(`${apiUrl}/api/auth/login`, {
         email,
         password,
       });

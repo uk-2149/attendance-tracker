@@ -25,6 +25,8 @@ const Home: React.FC<HomeProps> = ({ token }) => {
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [showForm, setShowForm] = useState<boolean>(false);
     const toast = useToast();
+
+    const apiUrl = import.meta.env.VITE_BACKEND_URL;
   
     useEffect(() => {
       const fetchSubjects = async () => {
@@ -41,7 +43,7 @@ const Home: React.FC<HomeProps> = ({ token }) => {
           }
         
           const res = await axios.get(
-            `https://attendance-tracker-pl45.onrender.com/api/subjects/`, 
+            `${apiUrl}/api/subjects/`, 
             { headers: {'x-auth-token': token} });
           setSubjects(res.data as Subject[]);
         } catch(err: any) {

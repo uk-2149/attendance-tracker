@@ -36,21 +36,29 @@ const RegisterForm: React.FC<RegisterProps> = ({ setToken }) => {
 
   const toast = useToast();
 
+  const apiUrl = import.meta.env.VITE_BACKEND_URL;
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const res = await axios.post<{ token: string }>("https://attendance-tracker-pl45.onrender.com/api/auth/register", {
+      const res = await axios.post<{ token: string }>(`${apiUrl}/api/auth/register`, {
         email,
         password,
       });
-
-      setToken(res.data.token);
-
-      localStorage.setItem("token", res.data.token);
-
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
+      console.log('API Response:', res.data);
+      toast({
+        title: 'Registration Successful!',
+        description: 'Redirecting to dashboard...',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+        position: "bottom-right"
+      });
+      
+      setTimeout(() => {
+        setToken(res.data.token);
+        localStorage.setItem("token", res.data.token);
+      }, 3000);      
 
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {

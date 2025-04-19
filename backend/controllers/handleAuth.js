@@ -13,6 +13,7 @@ async function handleRegister(req, res) {
         await user.save();
 
         const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, { expiresIn: '1h'});
+        res.json({ token })
     } catch(err) {
         res.status(500).json({error: err.message});
     }
