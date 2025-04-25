@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: "*",
+    origin: process.env.VITE_BACKEND_URL,
     credentials: true,
   })
 );
@@ -16,6 +16,7 @@ app.use(
 //error in dotenv
 // console.log("MongoDB URI:", process.env.MONGODB_URL);
 // console.log("JWT URI:", process.env.JWT_SECRET);
+console.log(process.env.VITE_BACKEND_URL);
 
 mongoose
   .connect(process.env.MONGODB_URL)
