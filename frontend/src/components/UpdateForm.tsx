@@ -14,12 +14,6 @@ import {
   HStack,
 } from "@chakra-ui/react";
 
-interface SubjectFormProps {
-  token: string;
-  setSubjects: React.Dispatch<React.SetStateAction<Subject[]>>;
-  onBack: () => void;
-}
-
 interface Subject {
   _id: string;
   userId: string;
@@ -32,19 +26,38 @@ interface Subject {
   missedClasses: number;
 }
 
-const SubjectForm: React.FC<SubjectFormProps> = ({
+interface SubjectFormProps {
+  subject: Subject;
+  token: string;
+  setSubjects: React.Dispatch<React.SetStateAction<Subject[]>>;
+  onBack: () => void;
+}
+
+const UpdateForm: React.FC<SubjectFormProps> = ({
+  subject,
   token,
   setSubjects,
   onBack,
 }) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    startDate: "",
-    endDate: "",
-    totalClasses: "",
-    missedClasses: "",
-    attendedClasses: "",
-    targetPercentage: "",
+  const {
+    _id,
+    name,
+    startDate,
+    endDate,
+    totalClasses,
+    attendedClasses,
+    targetPercentage,
+    missedClasses,
+  } = subject;
+  const formatDate = (isoDate: string) => isoDate.slice(0, 10);
+  const [updatedData, setUpdatedData] = useState({
+    name: name,
+    startDate: formatDate(startDate),
+    endDate: formatDate(endDate),
+    totalClasses: totalClasses,
+    missedClasses: missedClasses,
+    attendedClasses: attendedClasses,
+    targetPercentage: targetPercentage,
   });
 
   const toast = useToast();
@@ -65,23 +78,29 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
         return;
       }
 
-      const res = await axios.post(`${apiUrl}/api/subjects`, formData, {
-        headers: { "x-auth-token": token },
-      });
-      setSubjects((prev) => [...prev, res.data]);
-      setFormData({
-        name: "",
-        startDate: "",
-        endDate: "",
-        totalClasses: "",
-        missedClasses: "",
-        attendedClasses: "",
-        targetPercentage: "",
-      });
+      const res = await axios.put(
+        `${apiUrl}/api/subjects/update/${_id}`,
+        updatedData,
+        {
+          headers: { "x-auth-token": token },
+        }
+      );
+      setSubjects((prev) =>
+        prev.map((sub) => (sub._id === subject._id ? res.data : sub))
+      );
+      // setFormData({
+      //     name: '',
+      //     startDate: '',
+      //     endDate: '',
+      //     totalClasses: '',
+      //     missedClasses: '',
+      //     attendedClasses: '',
+      //     targetPercentage: '',
+      //   });
 
       toast({
-        title: "Subject Added",
-        description: "Subject added successfully.",
+        title: "Subject Updated",
+        description: "Subject updated successfully.",
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -91,7 +110,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
     } catch (err: any) {
       console.error(err.response?.data || err.message);
       toast({
-        title: "Error Adding Subject",
+        title: "Error Updating Subject",
         description: err.response?.data || err.message || "An error occurred.",
         status: "error",
         duration: 3000,
@@ -101,7 +120,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex align-center justify-center">
+    <div className="w-full h-full flex align-center justify-center z-10000">
       <Box
         borderWidth="1px"
         borderRadius="lg"
@@ -119,7 +138,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
             <Button onClick={onBack}>Back</Button>
             <Spacer />
             <Heading size="md" mt={2} textAlign="center" color="white">
-              Add New Subject
+              Update {name}
             </Heading>
           </Flex>
         </Box>
@@ -128,9 +147,9 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
             <FormControl id="name">
               <FormLabel>Subject Name</FormLabel>
               <Input
-                value={formData.name}
+                value={updatedData.name}
                 onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
+                  setUpdatedData({ ...updatedData, name: e.target.value })
                 }
                 placeholder="Subject name"
               />
@@ -140,9 +159,9 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
               <FormLabel>Start Date</FormLabel>
               <Input
                 type="date"
-                value={formData.startDate}
+                value={updatedData.startDate}
                 onChange={(e) =>
-                  setFormData({ ...formData, startDate: e.target.value })
+                  setUpdatedData({ ...updatedData, startDate: e.target.value })
                 }
               />
             </FormControl>
@@ -151,9 +170,9 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
               <FormLabel>End Date</FormLabel>
               <Input
                 type="date"
-                value={formData.endDate}
+                value={updatedData.endDate}
                 onChange={(e) =>
-                  setFormData({ ...formData, endDate: e.target.value })
+                  setUpdatedData({ ...updatedData, endDate: e.target.value })
                 }
               />
             </FormControl>
@@ -162,9 +181,12 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
               <FormLabel>Total Classes</FormLabel>
               <Input
                 type="number"
-                value={formData.totalClasses}
+                value={updatedData.totalClasses}
                 onChange={(e) =>
-                  setFormData({ ...formData, totalClasses: e.target.value })
+                  setUpdatedData({
+                    ...updatedData,
+                    totalClasses: Number(e.target.value),
+                  })
                 }
                 placeholder="Total no. of classes"
               />
@@ -174,11 +196,11 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
                 <FormLabel>Attended Classes</FormLabel>
                 <Input
                   type="number"
-                  value={formData.attendedClasses}
+                  value={updatedData.attendedClasses}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      attendedClasses: e.target.value,
+                    setUpdatedData({
+                      ...updatedData,
+                      attendedClasses: Number(e.target.value),
                     })
                   }
                   placeholder="no. of classes you have attended"
@@ -189,9 +211,12 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
                 <FormLabel>Missed Classes</FormLabel>
                 <Input
                   type="number"
-                  value={formData.missedClasses}
+                  value={updatedData.missedClasses}
                   onChange={(e) =>
-                    setFormData({ ...formData, missedClasses: e.target.value })
+                    setUpdatedData({
+                      ...updatedData,
+                      missedClasses: Number(e.target.value),
+                    })
                   }
                   placeholder="no. of classes you have missed"
                 />
@@ -201,9 +226,12 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
               <FormLabel>Target Percentage</FormLabel>
               <Input
                 type="number"
-                value={formData.targetPercentage}
+                value={updatedData.targetPercentage}
                 onChange={(e) =>
-                  setFormData({ ...formData, targetPercentage: e.target.value })
+                  setUpdatedData({
+                    ...updatedData,
+                    targetPercentage: Number(e.target.value),
+                  })
                 }
                 placeholder="Target Percentage"
               />
@@ -215,7 +243,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
               color="white"
               _hover={{ bg: "#dc2626" }}
             >
-              Add Subject
+              Update Subject
             </Button>
           </Stack>
         </Box>
@@ -224,4 +252,4 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
   );
 };
 
-export default SubjectForm;
+export default UpdateForm;
