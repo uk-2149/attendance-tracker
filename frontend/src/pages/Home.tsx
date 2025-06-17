@@ -10,12 +10,12 @@ import {
   VStack,
   useToast,
   Flex,
-  Container,
+  useBreakpointValue,
   IconButton,
   Text,
-  Fade,
+  SlideFade,
 } from "@chakra-ui/react";
-import { PlusIcon, LogOutIcon } from "lucide-react";
+import { AddIcon, ArrowBackIcon, UnlockIcon } from "@chakra-ui/icons";
 
 interface Subject {
   _id: string;
@@ -38,8 +38,9 @@ const Home: React.FC<HomeProps> = ({ token, setToken }) => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [showForm, setShowForm] = useState<boolean>(false);
   const toast = useToast();
-  const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_BACKEND_URL;
+  const navigate = useNavigate();
+  const isMobile = useBreakpointValue({ base: true, md: false });
 
   useEffect(() => {
     const fetchSubjects = async () => {
@@ -51,7 +52,6 @@ const Home: React.FC<HomeProps> = ({ token, setToken }) => {
             status: "error",
             duration: 3000,
             isClosable: true,
-            position: "top",
           });
           return;
         }
@@ -68,12 +68,11 @@ const Home: React.FC<HomeProps> = ({ token, setToken }) => {
           status: "error",
           duration: 3000,
           isClosable: true,
-          position: "top",
         });
       }
     };
     fetchSubjects();
-  }, [token, apiUrl, toast]);
+  }, [token]);
 
   const logOut = () => {
     localStorage.removeItem("token");
@@ -81,86 +80,73 @@ const Home: React.FC<HomeProps> = ({ token, setToken }) => {
     navigate("/login");
   };
 
-  return (
-    <Box minH="100vh" bg="gray.50" transition="all 0.3s">
-      {showForm ? (
-        <Fade in={showForm}>
-          <SubjectForm
-            token={token}
-            setSubjects={setSubjects}
-            onBack={() => setShowForm(false)}
+  const Header = () => (
+    <Flex
+      justify="space-between"
+      align="center"
+      py={4}
+      px={isMobile ? 4 : 8}
+      borderBottom="1px"
+      borderColor="gray.200"
+      position={isMobile ? "sticky" : "static"}
+      top="0"
+      bg="white"
+      zIndex="sticky"
+      shadow={isMobile ? "sm" : "none"}
+    >
+      <Heading size="lg" textAlign="left" fontWeight="bold">
+        Attendance Tracker
+      </Heading>
+      {!showForm && (
+        <Flex gap={2}>
+          <IconButton
+            aria-label="Add Subject"
+            icon={<AddIcon />}
+            onClick={() => setShowForm(true)}
+            colorScheme="teal"
           />
-        </Fade>
-      ) : (
-        <Container maxW="container.xl" py={{ base: 6, md: 10 }}>
-          <Fade in={!showForm}>
-            <Flex
-              justify="space-between"
-              align="center"
-              mb={{ base: 6, md: 8 }}
-              flexDir={{ base: "column", md: "row" }}
-              gap={{ base: 4, md: 0 }}
-            >
-              <Heading
-                as="h1"
-                size={{ base: "xl", md: "2xl" }}
-                bgGradient="linear(to-r, teal.500, blue.600)"
-                bgClip="text"
-                textAlign={{ base: "center", md: "left" }}
-              >
-                Attendance Tracker
-              </Heading>
-              <Flex gap={3}>
-                <Button
-                  leftIcon={<PlusIcon size={20} />}
-                  colorScheme="teal"
-                  variant="solid"
-                  size={{ base: "md", md: "lg" }}
-                  borderRadius="full"
-                  _hover={{ transform: "translateY(-2px)", shadow: "md" }}
-                  transition="all 0.2s"
-                  onClick={() => setShowForm(true)}
-                >
-                  Add Subject
-                </Button>
-                <IconButton
-                  aria-label="Sign out"
-                  icon={<LogOutIcon size={20} />}
-                  colorScheme="gray"
-                  variant="outline"
-                  size={{ base: "md", md: "lg" }}
-                  borderRadius="full"
-                  _hover={{ transform: "translateY(-2px)", shadow: "md" }}
-                  transition="all 0.2s"
-                  onClick={logOut}
-                />
-              </Flex>
-            </Flex>
+          <IconButton
+            aria-label="Sign Out"
+            icon={<UnlockIcon />}
+            onClick={logOut}
+            variant="outline"
+            colorScheme="red"
+          />
+        </Flex>
+      )}
+    </Flex>
+  );
 
-            {subjects.length === 0 ? (
-              <VStack spacing={4} mt={{ base: 10, md: 16 }} textAlign="center">
-                <Heading
-                  as="h2"
-                  size={{ base: "md", md: "lg" }}
-                  color="gray.600"
-                >
-                  No Subjects Yet
-                </Heading>
-                <Text color="gray.500" fontSize={{ base: "sm", md: "md" }}>
-                  Get started by adding a subject to track your attendance.
-                </Text>
-                <Button
-                  colorScheme="teal"
-                  variant="outline"
-                  size={{ base: "md", md: "lg" }}
-                  borderRadius="full"
-                  onClick={() => setShowForm(true)}
-                >
-                  Add Your First Subject
-                </Button>
-              </VStack>
-            ) : (
-              <VStack spacing={{ base: 4, md: 6 }} mt={{ base: 6, md: 8 }}>
+  return (
+    <Box minH="100vh" bg="gray.50">
+      <Header />
+
+      {showForm ? (
+        <Box px={isMobile ? 4 : 8} py={4}>
+          <Flex align="center" mb={4}>
+            <IconButton
+              icon={<ArrowBackIcon />}
+              aria-label="Back"
+              onClick={() => setShowForm(false)}
+              variant="ghost"
+              mr={2}
+            />
+            <Heading size="md">Add New Subject</Heading>
+          </Flex>
+          <SubjectForm token={token} setSubjects={setSubjects} onBack={() => setShowForm(false)} />
+        </Box>
+      ) : (
+        <Box px={isMobile ? 4 : 8} py={4}>
+          {subjects.length === 0 ? (
+            <Flex direction="column" align="center" mt={12} color="gray.500">
+              <Heading size="md">No subjects added yet</Heading>
+              <Text mt={2} fontSize="sm">
+                Start by clicking the + button to add your first subject
+              </Text>
+            </Flex>
+          ) : (
+            <SlideFade in={true} offsetY="20px">
+              <VStack spacing={4} mt={4} align="stretch">
                 {subjects.map((subject) => (
                   <SubjectCard
                     key={subject._id}
@@ -170,45 +156,41 @@ const Home: React.FC<HomeProps> = ({ token, setToken }) => {
                   />
                 ))}
               </VStack>
-            )}
+            </SlideFade>
+          )}
+        </Box>
+      )}
 
-            <Flex
-              position="fixed"
-              bottom={{ base: 4, md: 0 }}
-              left={0}
-              right={0}
-              justify="center"
-              px={4}
-              zIndex={999}
-              display={{ base: "flex", md: "none" }}
-              gap={3}
-            >
-              <Button
-                leftIcon={<PlusIcon size={20} />}
-                colorScheme="teal"
-                size="lg"
-                borderRadius="full"
-                flex={1}
-                _hover={{ transform: "translateY(-2px)", shadow: "md" }}
-                transition="all 0.2s"
-                onClick={() => setShowForm(true)}
-              >
-                Add Subject
-              </Button>
-              <IconButton
-                aria-label="Sign out"
-                icon={<LogOutIcon size={20} />}
-                colorScheme="gray"
-                variant="outline"
-                size="lg"
-                borderRadius="full"
-                _hover={{ transform: "translateY(-2px)", shadow: "md" }}
-                transition="all 0.2s"
-                onClick={logOut}
-              />
-            </Flex>
-          </Fade>
-        </Container>
+      {/* Mobile Floating Buttons */}
+      {isMobile && !showForm && (
+        <Flex
+          position="fixed"
+          bottom="4"
+          left="0"
+          right="0"
+          px={6}
+          justify="space-between"
+          zIndex={1000}
+        >
+          <Button
+            leftIcon={<UnlockIcon />}
+            onClick={logOut}
+            variant="outline"
+            colorScheme="red"
+            flex={1}
+            mr={2}
+          >
+            Sign Out
+          </Button>
+          <Button
+            leftIcon={<AddIcon />}
+            onClick={() => setShowForm(true)}
+            colorScheme="teal"
+            flex={1}
+          >
+            Add Subject
+          </Button>
+        </Flex>
       )}
     </Box>
   );

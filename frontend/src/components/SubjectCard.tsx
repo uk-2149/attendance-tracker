@@ -7,13 +7,15 @@ import {
   Button,
   Flex,
   useToast,
-  IconButton,
+  Progress,
   Badge,
-  VStack,
   HStack,
-  Divider,
+  VStack,
+  useBreakpointValue,
+  IconButton,
 } from "@chakra-ui/react";
 import { Edit } from "lucide-react";
+import { CheckCircleIcon, CloseIcon } from "@chakra-ui/icons";
 import UpdateForm from "./UpdateForm";
 
 interface Subject {
@@ -47,18 +49,26 @@ const SubjectCard: React.FC<SubjectCardProps> = ({
     targetPercentage,
     missedClasses,
   } = subject;
+
+  const toast = useToast();
+  const isMobile = useBreakpointValue({ base: true, md: false });
+  const [showUpdateForm, setShowUpdateForm] = useState<boolean>(false);
+  const apiUrl = import.meta.env.VITE_BACKEND_URL;
+
+  const percentage = totalClasses
+    ? (attendedClasses / totalClasses) * 100
+    : 0;
   const classesToMiss = Math.floor(
     totalClasses - (targetPercentage * totalClasses) / 100 - missedClasses
   );
-  const [showUpdateForm, setShowUpdateForm] = useState<boolean>(false);
-  const toast = useToast();
-  const apiUrl = import.meta.env.VITE_BACKEND_URL;
+  const isOnTrack = percentage >= targetPercentage;
 
   const updateAttendance = async (attended: boolean) => {
     const updatedAttendedClasses = attended
       ? attendedClasses + 1
       : attendedClasses;
     const updatedMissedClasses = attended ? missedClasses : missedClasses + 1;
+
     try {
       if (!token) {
         toast({
@@ -67,7 +77,6 @@ const SubjectCard: React.FC<SubjectCardProps> = ({
           status: "error",
           duration: 3000,
           isClosable: true,
-          position: "top",
         });
         return;
       }
@@ -82,30 +91,32 @@ const SubjectCard: React.FC<SubjectCardProps> = ({
           headers: { "x-auth-token": token },
         }
       );
+
       setSubjects((prev) =>
         prev.map((sub) => (sub._id === _id ? res.data : sub))
       );
+
       toast({
-        title: "Attendance Updated",
+        title: "Attendance updated",
         description: "Attendance updated successfully",
         status: "success",
         duration: 3000,
         isClosable: true,
-        position: "top",
       });
 
       if (updatedAttendedClasses + updatedMissedClasses === totalClasses) {
         await axios.delete(`${apiUrl}/api/subjects/delete/${_id}`, {
           headers: { "x-auth-token": token },
         });
+
         setSubjects((prev) => prev.filter((sub) => sub._id !== _id));
+
         toast({
           title: "Session Completed",
           description: `Total number of classes reached and ${name} has been deleted.`,
           status: "info",
           duration: 5000,
           isClosable: true,
-          position: "top",
         });
       }
     } catch (err: any) {
@@ -116,7 +127,6 @@ const SubjectCard: React.FC<SubjectCardProps> = ({
         status: "error",
         duration: 3000,
         isClosable: true,
-        position: "top",
       });
     }
   };
@@ -136,121 +146,80 @@ const SubjectCard: React.FC<SubjectCardProps> = ({
     <Box
       bg="white"
       borderRadius="xl"
-      p={{ base: 4, md: 6 }}
       boxShadow="md"
-      _hover={{
-        boxShadow: "lg",
-        transform: "translateY(-4px)",
-      }}
-      transition="all 0.3s"
-      w="full"
+      p={6}
       position="relative"
-      borderWidth="1px"
-      borderColor="gray.200"
+      _hover={{ boxShadow: "lg", transform: "translateY(-2px)", transition: "0.2s" }}
     >
       <IconButton
-        aria-label="Edit subject"
-        icon={<Edit size={18} />}
-        size="sm"
-        variant="ghost"
-        colorScheme="gray"
+        icon={<Edit />}
+        aria-label="Edit Subject"
         position="absolute"
         top={4}
         right={4}
-        borderRadius="full"
-        _hover={{ bg: "gray.100", transform: "scale(1.1)" }}
-        transition="all 0.2s"
+        size="sm"
+        variant="ghost"
         onClick={() => setShowUpdateForm(true)}
       />
 
-      <VStack align="start" spacing={3}>
-        <HStack justify="space-between" w="full">
-          <Heading
-            size={{ base: "md", md: "lg" }}
-            color="gray.800"
-            noOfLines={1}
-          >
-            {name}
-          </Heading>
-          <Badge
-            colorScheme={
-              (attendedClasses / totalClasses) * 100 >= targetPercentage
-                ? "green"
-                : classesToMiss >= 0
-                ? "yellow"
-                : "red"
-            }
-            borderRadius="full"
-            px={3}
-            py={1}
-            fontSize={{ base: "xs", md: "sm" }}
-          >
-            {totalClasses > 0
-              ? ((attendedClasses / totalClasses) * 100).toFixed(1)
-              : "0.0"}
-            %
-          </Badge>
-        </HStack>
+      <Flex justify="space-between" align="center" mb={3}>
+        <Heading size="md" noOfLines={1}>
+          {name}
+        </Heading>
+        <Badge colorScheme={isOnTrack ? "green" : "red"}>
+          {isOnTrack ? "On Track" : "Falling Behind"}
+        </Badge>
+      </Flex>
 
-        <Divider borderColor="gray.200" />
+      <Text fontSize="sm" color="gray.600" mb={2}>
+        Target: {targetPercentage}%
+      </Text>
 
-        <VStack align="start" spacing={2} fontSize={{ base: "sm", md: "md" }}>
-          <HStack justify="space-between" w="full">
-            <Text color="gray.600">Attendance</Text>
-            <Text fontWeight="medium">
-              {attendedClasses}/{totalClasses} classes
-            </Text>
-          </HStack>
-          <HStack justify="space-between" w="full">
-            <Text color="gray.600">Missed Classes</Text>
-            <Text fontWeight="medium">{missedClasses}</Text>
-          </HStack>
-          <HStack justify="space-between" w="full">
-            <Text color="gray.600">Target</Text>
-            <Text fontWeight="medium">{targetPercentage}%</Text>
-          </HStack>
-          <HStack justify="space-between" w="full">
-            <Text color="gray.600">Classes You Can Miss</Text>
-            <Text
-              fontWeight="medium"
-              color={classesToMiss >= 0 ? "gray.800" : "red.500"}
-            >
-              {Number(classesToMiss) > 0 ? classesToMiss : 0}
-            </Text>
-          </HStack>
-        </VStack>
+      <Progress
+        value={percentage}
+        size="sm"
+        colorScheme={percentage >= targetPercentage ? "green" : "red"}
+        borderRadius="md"
+        mb={4}
+      />
 
-        <Flex
-          mt={4}
-          w="full"
-          gap={{ base: 2, md: 3 }}
-          flexDir={{ base: "column", sm: "row" }}
-        >
-          <Button
-            colorScheme="teal"
-            size={{ base: "md", md: "lg" }}
-            borderRadius="full"
-            flex={1}
-            _hover={{ transform: "translateY(-2px)", boxShadow: "md" }}
-            transition="all 0.2s"
-            onClick={() => updateAttendance(true)}
-          >
-            Attended
-          </Button>
-          <Button
-            colorScheme="red"
-            variant="outline"
-            size={{ base: "md", md: "lg" }}
-            borderRadius="full"
-            flex={1}
-            _hover={{ transform: "translateY(-2px)", boxShadow: "md" }}
-            transition="all 0.2s"
-            onClick={() => updateAttendance(false)}
-          >
-            Missed
-          </Button>
-        </Flex>
+      <VStack align="start" spacing={1} fontSize="sm" color="gray.700">
+        <Text>
+          Attendance:{" "}
+          <strong>
+            {attendedClasses}/{totalClasses}
+          </strong>{" "}
+          ({percentage.toFixed(2)}%)
+        </Text>
+        <Text>Missed Classes: {missedClasses}</Text>
+        <Text>
+          Can still miss:{" "}
+          <strong>
+            {classesToMiss > 0 ? classesToMiss : 0}
+          </strong>
+        </Text>
       </VStack>
+
+      <HStack mt={6} spacing={4} justify="center" wrap="wrap">
+        <Button
+          leftIcon={<CheckCircleIcon />}
+          colorScheme="green"
+          variant="solid"
+          size={isMobile ? "sm" : "md"}
+          onClick={() => updateAttendance(true)}
+        >
+          Attended
+        </Button>
+        <Button
+          leftIcon={<CloseIcon />}
+          colorScheme="red"
+          variant="outline"
+          size={isMobile ? "sm" : "md"}
+          onClick={() => updateAttendance(false)}
+        >
+          Missed
+        </Button>
+      </HStack>
     </Box>
   );
 };
