@@ -155,7 +155,7 @@ const SubjectCard: React.FC<SubjectCardProps> = ({
         icon={<Edit />}
         aria-label="Edit Subject"
         position="absolute"
-        top={4}
+        top={5}
         right={4}
         size="sm"
         variant="ghost"
@@ -166,7 +166,7 @@ const SubjectCard: React.FC<SubjectCardProps> = ({
         <Heading size="md" noOfLines={1}>
           {name}
         </Heading>
-        <Badge colorScheme={isOnTrack ? "green" : "red"}>
+        <Badge colorScheme={isOnTrack ? "green" : "red"} mr={10}>
           {isOnTrack ? "On Track" : "Falling Behind"}
         </Badge>
       </Flex>

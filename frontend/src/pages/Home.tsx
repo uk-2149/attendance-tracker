@@ -94,24 +94,39 @@ const Home: React.FC<HomeProps> = ({ token, setToken }) => {
       zIndex="sticky"
       shadow={isMobile ? "sm" : "none"}
     >
-      <Heading size="lg" textAlign="left" fontWeight="bold">
+      <Heading size="lg" fontWeight="bold">
         Attendance Tracker
       </Heading>
+
       {!showForm && (
         <Flex gap={2}>
-          <IconButton
-            aria-label="Add Subject"
-            icon={<AddIcon />}
-            onClick={() => setShowForm(true)}
-            colorScheme="teal"
-          />
-          <IconButton
-            aria-label="Sign Out"
-            icon={<UnlockIcon />}
-            onClick={logOut}
-            variant="outline"
-            colorScheme="red"
-          />
+          {isMobile ? (
+            <IconButton
+              aria-label="Sign Out"
+              icon={<UnlockIcon />}
+              onClick={logOut}
+              variant="outline"
+              colorScheme="red"
+            />
+          ) : (
+            <>
+              <Button
+                leftIcon={<AddIcon />}
+                colorScheme="teal"
+                onClick={() => setShowForm(true)}
+              >
+                Add Subject
+              </Button>
+              <Button
+                leftIcon={<UnlockIcon />}
+                variant="outline"
+                colorScheme="red"
+                onClick={logOut}
+              >
+                Sign Out
+              </Button>
+            </>
+          )}
         </Flex>
       )}
     </Flex>
@@ -133,7 +148,7 @@ const Home: React.FC<HomeProps> = ({ token, setToken }) => {
             />
             <Heading size="md">Add New Subject</Heading>
           </Flex>
-          <SubjectForm token={token} setSubjects={setSubjects} onBack={() => setShowForm(false)} />
+          <SubjectForm token={token} setSubjects={setSubjects} />
         </Box>
       ) : (
         <Box px={isMobile ? 4 : 8} py={4}>
@@ -161,35 +176,18 @@ const Home: React.FC<HomeProps> = ({ token, setToken }) => {
         </Box>
       )}
 
-      {/* Mobile Floating Buttons */}
+      {/* Floating Add Button on Mobile */}
       {isMobile && !showForm && (
-        <Flex
-          position="fixed"
-          bottom="4"
-          left="0"
-          right="0"
-          px={6}
-          justify="space-between"
-          zIndex={1000}
-        >
-          <Button
-            leftIcon={<UnlockIcon />}
-            onClick={logOut}
-            variant="outline"
-            colorScheme="red"
-            flex={1}
-            mr={2}
-          >
-            Sign Out
-          </Button>
-          <Button
-            leftIcon={<AddIcon />}
+        <Flex position="fixed" bottom="4" right="4" zIndex={1000}>
+          <IconButton
+            aria-label="Add Subject"
+            icon={<AddIcon />}
             onClick={() => setShowForm(true)}
             colorScheme="teal"
-            flex={1}
-          >
-            Add Subject
-          </Button>
+            size="lg"
+            shadow="lg"
+            rounded="full"
+          />
         </Flex>
       )}
     </Box>

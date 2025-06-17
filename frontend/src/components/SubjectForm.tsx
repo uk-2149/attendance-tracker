@@ -9,8 +9,8 @@ import {
   Box,
   Heading,
   useToast,
-  Flex,
-  Spacer,
+  VStack,
+  Text,
   HStack,
 } from "@chakra-ui/react";
 import Loader from "../components/Loader";
@@ -18,7 +18,6 @@ import Loader from "../components/Loader";
 interface SubjectFormProps {
   token: string;
   setSubjects: React.Dispatch<React.SetStateAction<Subject[]>>;
-  onBack: () => void;
 }
 
 interface Subject {
@@ -33,11 +32,7 @@ interface Subject {
   missedClasses: number;
 }
 
-const SubjectForm: React.FC<SubjectFormProps> = ({
-  token,
-  setSubjects,
-  onBack,
-}) => {
+const SubjectForm: React.FC<SubjectFormProps> = ({ token, setSubjects }) => {
   const [formData, setFormData] = useState({
     name: "",
     startDate: "",
@@ -48,9 +43,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
     targetPercentage: "",
   });
   const [loading, setLoading] = useState(false);
-
   const toast = useToast();
-
   const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,6 +64,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
       const res = await axios.post(`${apiUrl}/api/subjects`, formData, {
         headers: { "x-auth-token": token },
       });
+
       setSubjects((prev) => [...prev, res.data]);
       setFormData({
         name: "",
@@ -89,8 +83,6 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
         duration: 3000,
         isClosable: true,
       });
-
-      onBack();
     } catch (err: any) {
       console.error(err.response?.data || err.message);
       toast({
@@ -108,39 +100,44 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
   return (
     <>
       {loading && <Loader />}
-      {
-        <div className="w-full h-full flex align-center justify-center">
-          <Box
-            borderWidth="1px"
-            borderRadius="lg"
-            w="full"
-            maxW="lg"
-            overflow="hidden"
-            bg="gray.100"
-            h="content-fit"
-            boxShadow="dark-lg"
-            m="auto"
-            className="h-fit"
-          >
-            <Box bg="#eb4034" p={6}>
-              <Flex>
-                <Button onClick={onBack}>Back</Button>
-                <Spacer />
-                <Heading size="md" mt={2} textAlign="center" color="white">
-                  Add New Subject
-                </Heading>
-              </Flex>
+      <Box
+        w="full"
+        minH="100vh"
+        bg="gray.50"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        px={4}
+      >
+        <Box
+          w="full"
+          maxW="lg"
+          borderWidth="1px"
+          borderRadius="2xl"
+          boxShadow="xl"
+          bg="white"
+          p={{ base: 6, md: 10 }}
+        >
+          <VStack spacing={6} align="stretch">
+            <Box textAlign="center">
+              <Heading size="lg" color="red.500">
+                Add New Subject
+              </Heading>
+              <Text fontSize="sm" color="gray.600" mt={2}>
+                Fill in the subject details below.
+              </Text>
             </Box>
-            <Box as="form" onSubmit={handleSubmit} p={4}>
+
+            <form onSubmit={handleSubmit}>
               <Stack spacing={4}>
-                <FormControl id="name">
+                <FormControl id="name" isRequired>
                   <FormLabel>Subject Name</FormLabel>
                   <Input
                     value={formData.name}
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    placeholder="Subject name"
+                    placeholder="e.g., Mathematics"
                   />
                 </FormControl>
 
@@ -166,19 +163,24 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
                   />
                 </FormControl>
 
-                <FormControl id="totalClasses">
+                <FormControl id="totalClasses" isRequired>
                   <FormLabel>Total Classes</FormLabel>
                   <Input
                     type="number"
                     value={formData.totalClasses}
                     onChange={(e) =>
-                      setFormData({ ...formData, totalClasses: e.target.value })
+                      setFormData({
+                        ...formData,
+                        totalClasses: e.target.value,
+                      })
                     }
-                    placeholder="Total no. of classes"
+                    placeholder="e.g., 50"
                   />
                 </FormControl>
-                <HStack>
-                  <FormControl id="attendedClasses">
+
+                {/* Attended + Missed side by side */}
+                <HStack spacing={4}>
+                  <FormControl id="attendedClasses" isRequired>
                     <FormLabel>Attended Classes</FormLabel>
                     <Input
                       type="number"
@@ -189,11 +191,11 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
                           attendedClasses: e.target.value,
                         })
                       }
-                      placeholder="no. of classes you have attended"
+                      placeholder="e.g., 40"
                     />
                   </FormControl>
 
-                  <FormControl id="missedClasses">
+                  <FormControl id="missedClasses" isRequired>
                     <FormLabel>Missed Classes</FormLabel>
                     <Input
                       type="number"
@@ -204,12 +206,13 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
                           missedClasses: e.target.value,
                         })
                       }
-                      placeholder="no. of classes you have missed"
+                      placeholder="e.g., 10"
                     />
                   </FormControl>
                 </HStack>
-                <FormControl id="targetPercentage">
-                  <FormLabel>Target Percentage</FormLabel>
+
+                <FormControl id="targetPercentage" isRequired>
+                  <FormLabel>Target Attendance (%)</FormLabel>
                   <Input
                     type="number"
                     value={formData.targetPercentage}
@@ -219,23 +222,25 @@ const SubjectForm: React.FC<SubjectFormProps> = ({
                         targetPercentage: e.target.value,
                       })
                     }
-                    placeholder="Target Percentage"
+                    placeholder="e.g., 75"
                   />
                 </FormControl>
 
                 <Button
                   type="submit"
-                  bg="#eb4034"
+                  bg="red.500"
                   color="white"
-                  _hover={{ bg: "#dc2626" }}
+                  size="lg"
+                  mt={4}
+                  _hover={{ bg: "red.600" }}
                 >
                   Add Subject
                 </Button>
               </Stack>
-            </Box>
-          </Box>
-        </div>
-      }
+            </form>
+          </VStack>
+        </Box>
+      </Box>
     </>
   );
 };

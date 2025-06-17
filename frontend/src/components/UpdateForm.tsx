@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import {
+  chakra,
   FormControl,
   FormLabel,
   Input,
@@ -9,10 +10,9 @@ import {
   Box,
   Heading,
   useToast,
-  Flex,
-  Spacer,
   HStack,
 } from "@chakra-ui/react";
+import { IoArrowBack } from "react-icons/io5";
 import Loader from "./Loader";
 
 interface Subject {
@@ -50,20 +50,21 @@ const UpdateForm: React.FC<SubjectFormProps> = ({
     targetPercentage,
     missedClasses,
   } = subject;
+
   const formatDate = (isoDate: string) => isoDate.slice(0, 10);
+
   const [updatedData, setUpdatedData] = useState({
-    name: name,
+    name,
     startDate: formatDate(startDate),
     endDate: formatDate(endDate),
-    totalClasses: totalClasses,
-    missedClasses: missedClasses,
-    attendedClasses: attendedClasses,
-    targetPercentage: targetPercentage,
+    totalClasses,
+    attendedClasses,
+    missedClasses,
+    targetPercentage,
   });
+
   const [loading, setLoading] = useState(false);
-
   const toast = useToast();
-
   const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,7 +74,7 @@ const UpdateForm: React.FC<SubjectFormProps> = ({
       if (!token) {
         toast({
           title: "Authentication Error",
-          description: "You must be logged in to add subjects.",
+          description: "You must be logged in to update subjects.",
           status: "error",
           duration: 3000,
           isClosable: true,
@@ -88,18 +89,10 @@ const UpdateForm: React.FC<SubjectFormProps> = ({
           headers: { "x-auth-token": token },
         }
       );
+
       setSubjects((prev) =>
         prev.map((sub) => (sub._id === subject._id ? res.data : sub))
       );
-      // setFormData({
-      //     name: '',
-      //     startDate: '',
-      //     endDate: '',
-      //     totalClasses: '',
-      //     missedClasses: '',
-      //     attendedClasses: '',
-      //     targetPercentage: '',
-      //   });
 
       toast({
         title: "Subject Updated",
@@ -127,143 +120,138 @@ const UpdateForm: React.FC<SubjectFormProps> = ({
   return (
     <>
       {loading && <Loader />}
-      {
-        <div className="w-full h-full flex align-center justify-center z-10000">
-          <Box
-            borderWidth="1px"
-            borderRadius="lg"
-            w="full"
-            maxW="lg"
-            overflow="hidden"
-            bg="gray.100"
-            h="content-fit"
-            boxShadow="dark-lg"
-            m="auto"
-            className="h-fit"
-          >
-            <Box bg="#eb4034" p={6}>
-              <Flex>
-                <Button onClick={onBack}>Back</Button>
-                <Spacer />
-                <Heading size="md" mt={2} textAlign="center" color="white">
-                  Update {name}
-                </Heading>
-              </Flex>
-            </Box>
-            <Box as="form" onSubmit={handleSubmit} p={4}>
-              <Stack spacing={4}>
-                <FormControl id="name">
-                  <FormLabel>Subject Name</FormLabel>
-                  <Input
-                    value={updatedData.name}
-                    onChange={(e) =>
-                      setUpdatedData({ ...updatedData, name: e.target.value })
-                    }
-                    placeholder="Subject name"
-                  />
-                </FormControl>
+      <div className="w-full h-full flex justify-center items-center">
+        <Box
+          borderWidth="1px"
+          borderRadius="lg"
+          maxW="lg"
+          w="full"
+          bg="gray.100"
+          boxShadow="dark-lg"
+          m="auto"
+        >
+          <Box bg="#eb4034" p={4} borderTopRadius="lg">
+          <Heading size="md" color="white" display="flex" alignItems="center" gap={2}>
+  <chakra.span
+    onClick={onBack}
+    cursor="pointer"
+    _hover={{ color: "gray.300" }}
+    fontSize="xl"
+  >
+    <IoArrowBack />
+  </chakra.span>
+  Update {name}
+</Heading>
+</Box>
+          <Box as="form" onSubmit={handleSubmit} p={6}>
+            <Stack spacing={4}>
+              <FormControl id="name">
+                <FormLabel>Subject Name</FormLabel>
+                <Input
+                  value={updatedData.name}
+                  onChange={(e) =>
+                    setUpdatedData({ ...updatedData, name: e.target.value })
+                  }
+                  placeholder="Subject name"
+                />
+              </FormControl>
 
-                <FormControl id="startDate">
-                  <FormLabel>Start Date</FormLabel>
-                  <Input
-                    type="date"
-                    value={updatedData.startDate}
-                    onChange={(e) =>
-                      setUpdatedData({
-                        ...updatedData,
-                        startDate: e.target.value,
-                      })
-                    }
-                  />
-                </FormControl>
+              <FormControl id="startDate">
+                <FormLabel>Start Date</FormLabel>
+                <Input
+                  type="date"
+                  value={updatedData.startDate}
+                  onChange={(e) =>
+                    setUpdatedData({ ...updatedData, startDate: e.target.value })
+                  }
+                />
+              </FormControl>
 
-                <FormControl id="endDate">
-                  <FormLabel>End Date</FormLabel>
-                  <Input
-                    type="date"
-                    value={updatedData.endDate}
-                    onChange={(e) =>
-                      setUpdatedData({
-                        ...updatedData,
-                        endDate: e.target.value,
-                      })
-                    }
-                  />
-                </FormControl>
+              <FormControl id="endDate">
+                <FormLabel>End Date</FormLabel>
+                <Input
+                  type="date"
+                  value={updatedData.endDate}
+                  onChange={(e) =>
+                    setUpdatedData({ ...updatedData, endDate: e.target.value })
+                  }
+                />
+              </FormControl>
 
-                <FormControl id="totalClasses">
-                  <FormLabel>Total Classes</FormLabel>
-                  <Input
-                    type="number"
-                    value={updatedData.totalClasses}
-                    onChange={(e) =>
-                      setUpdatedData({
-                        ...updatedData,
-                        totalClasses: Number(e.target.value),
-                      })
-                    }
-                    placeholder="Total no. of classes"
-                  />
-                </FormControl>
-                <HStack>
-                  <FormControl id="attendedClasses">
-                    <FormLabel>Attended Classes</FormLabel>
-                    <Input
-                      type="number"
-                      value={updatedData.attendedClasses}
-                      onChange={(e) =>
-                        setUpdatedData({
-                          ...updatedData,
-                          attendedClasses: Number(e.target.value),
-                        })
-                      }
-                      placeholder="no. of classes you have attended"
-                    />
-                  </FormControl>
+              <FormControl id="totalClasses">
+                <FormLabel>Total Classes</FormLabel>
+                <Input
+                  type="number"
+                  value={updatedData.totalClasses}
+                  onChange={(e) =>
+                    setUpdatedData({
+                      ...updatedData,
+                      totalClasses: Number(e.target.value),
+                    })
+                  }
+                  placeholder="Total no. of classes"
+                />
+              </FormControl>
 
-                  <FormControl id="missedClasses">
-                    <FormLabel>Missed Classes</FormLabel>
-                    <Input
-                      type="number"
-                      value={updatedData.missedClasses}
-                      onChange={(e) =>
-                        setUpdatedData({
-                          ...updatedData,
-                          missedClasses: Number(e.target.value),
-                        })
-                      }
-                      placeholder="no. of classes you have missed"
-                    />
-                  </FormControl>
-                </HStack>
-                <FormControl id="targetPercentage">
-                  <FormLabel>Target Percentage</FormLabel>
+              <HStack spacing={4}>
+                <FormControl id="attendedClasses">
+                  <FormLabel>Attended Classes</FormLabel>
                   <Input
                     type="number"
-                    value={updatedData.targetPercentage}
+                    value={updatedData.attendedClasses}
                     onChange={(e) =>
                       setUpdatedData({
                         ...updatedData,
-                        targetPercentage: Number(e.target.value),
+                        attendedClasses: Number(e.target.value),
                       })
                     }
-                    placeholder="Target Percentage"
+                    placeholder="Attended classes"
                   />
                 </FormControl>
 
-                <Button
-                  type="submit"
-                  bg="#eb4034"
-                  color="white"
-                  _hover={{ bg: "#dc2626" }}
-                >
-                  Update Subject
-                </Button>
-              </Stack>
-            </Box>
+                <FormControl id="missedClasses">
+                  <FormLabel>Missed Classes</FormLabel>
+                  <Input
+                    type="number"
+                    value={updatedData.missedClasses}
+                    onChange={(e) =>
+                      setUpdatedData({
+                        ...updatedData,
+                        missedClasses: Number(e.target.value),
+                      })
+                    }
+                    placeholder="Missed classes"
+                  />
+                </FormControl>
+              </HStack>
+
+              <FormControl id="targetPercentage">
+                <FormLabel>Target Percentage</FormLabel>
+                <Input
+                  type="number"
+                  value={updatedData.targetPercentage}
+                  onChange={(e) =>
+                    setUpdatedData({
+                      ...updatedData,
+                      targetPercentage: Number(e.target.value),
+                    })
+                  }
+                  placeholder="Target %"
+                />
+              </FormControl>
+
+              <Button
+                type="submit"
+                bg="#eb4034"
+                color="white"
+                _hover={{ bg: "#dc2626" }}
+              >
+                Update Subject
+              </Button>
+            </Stack>
           </Box>
-        </div>
-      }
+        </Box>
+      </div>
     </>
   );
 };
