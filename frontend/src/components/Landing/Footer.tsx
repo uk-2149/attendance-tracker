@@ -7,12 +7,11 @@ import {
   HStack,
   Divider,
   Link,
-  useBreakpointValue,
 } from "@chakra-ui/react";
-import { CheckCircle, Github, Mail, Twitter, X } from "lucide-react";
+import { CheckCircle, Github, Twitter } from "lucide-react";
 
 const Footer = () => {
-  const isMobile = useBreakpointValue({ base: true, md: false });
+//   const isMobile = useBreakpointValue({ base: true, md: false })
 
   return (
     <Box bg="gray.800" color="white" py={12} px={4}>
