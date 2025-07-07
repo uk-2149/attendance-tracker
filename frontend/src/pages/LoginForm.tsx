@@ -16,6 +16,7 @@ import {
   VStack,
   Icon,
   Circle,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { CheckSquare, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import axios from "axios";
@@ -39,141 +40,129 @@ const LoginForm: React.FC<LoginProps> = ({ setToken }) => {
     try {
       const res = await axios.post<{ token: string }>(
         `${apiUrl}/api/auth/login`,
-        {
-          email,
-          password,
-        }
+        { email, password }
       );
-      // console.log('Login response:', res.data);
       setToken(res.data.token);
       localStorage.setItem("token", res.data.token);
-      // console.log('Token set:', res.data.token);
-      console.log("Submitted");
+      console.log("Login successful");
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
         console.error(err.response.data);
       } else {
-        console.error("An unexpected error occurred", err);
+        console.error("Unexpected error:", err);
       }
     } finally {
       setLoading(false);
     }
   };
 
+  const headingSize = useBreakpointValue({ base: "xl", md: "2xl" });
+
   return (
     <>
       {loading && <Loader />}
-      {
-        <div className="w-full h-[100vh] flex align-center justify-center bg-amber-300">
-          <Box
-            w="full"
-            maxW="md"
-            borderRadius="lg"
-            overflow="hidden"
-            bg="white"
-            boxShadow="2xl"
-            h="fit-content"
-            mt="10vh"
-          >
-            {/*The top part*/}
-            <Box bg="#eb4034" p={6}>
-              <Flex direction="column" alignItems="center">
-                <Circle
-                  size="16"
-                  bg="white"
-                  mb="4"
-                  display="flex"
-                  alignItems="center"
-                  justifyItems="center"
-                >
-                  <Icon as={CheckSquare} boxSize={8} color="#eb4034" />
-                </Circle>
-              </Flex>
-              <Heading size="lg" color="white" textAlign="center">
+      <Flex
+        minH="100vh"
+        align="center"
+        justify="center"
+        bgGradient="linear(to-br, yellow.100, orange.100, red.100)"
+        px={4}
+      >
+        <Box
+          w="full"
+          maxW="md"
+          bg="white"
+          borderRadius="2xl"
+          boxShadow="2xl"
+          overflow="hidden"
+        >
+          {/* Header */}
+          <Box bgGradient="linear(to-r, yellow.400, red.500)" py={6} px={4}>
+            <Flex direction="column" align="center">
+              <Circle size="16" bg="white" mb={4}>
+                <Icon as={CheckSquare} boxSize={8} color="red.500" />
+              </Circle>
+              <Heading size={headingSize} color="white" textAlign="center">
                 Attendance Tracker
               </Heading>
-              <Text color="white" mt={2} textAlign="center">
-                Manage your attendance records
+              <Text color="whiteAlpha.900" mt={1} fontSize="sm" textAlign="center">
+                Effortless attendance control for smart students
               </Text>
-            </Box>
-            {/*top part ends*/}
-
-            {/*Form*/}
-            <Box as="form" onSubmit={handleSubmit} p={6}>
-              <VStack spacing={6}>
-                <FormControl>
-                  <FormLabel htmlFor="email">Email</FormLabel>
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <Icon as={Mail} color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="student@study.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </InputGroup>
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel htmlFor="password">Password</FormLabel>
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <Icon as={Lock} color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                    <InputRightElement>
-                      <Box
-                        as="button"
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        <Icon
-                          as={showPassword ? EyeOff : Eye}
-                          color="gray.800"
-                        />
-                      </Box>
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
-
-                <Button
-                  type="submit"
-                  w="full"
-                  bg="#eb4034"
-                  color="white"
-                  _hover={{ bg: "#dc2626" }}
-                >
-                  Sign in
-                </Button>
-
-                <Text fontSize="sm" textAlign="center" color="gray.600">
-                  Don't have an account?{" "}
-                  <Link
-                    as={RouterLink}
-                    to="/register"
-                    color="primary.500"
-                    fontWeight="medium"
-                    _hover={{ textDecoration: "underline" }}
-                  >
-                    Register
-                  </Link>
-                </Text>
-              </VStack>
-            </Box>
+            </Flex>
           </Box>
-        </div>
-      }
+
+          {/* Form */}
+          <Box as="form" onSubmit={handleSubmit} py={8} px={6}>
+            <VStack spacing={5}>
+              <FormControl isRequired>
+                <FormLabel>Email</FormLabel>
+                <InputGroup>
+                  <InputLeftElement pointerEvents="none">
+                    <Icon as={Mail} color="gray.400" />
+                  </InputLeftElement>
+                  <Input
+                    type="email"
+                    placeholder="student@study.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </InputGroup>
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>Password</FormLabel>
+                <InputGroup>
+                  <InputLeftElement pointerEvents="none">
+                    <Icon as={Lock} color="gray.400" />
+                  </InputLeftElement>
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <InputRightElement>
+                    <Box
+                      as="button"
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      <Icon as={showPassword ? EyeOff : Eye} color="gray.600" />
+                    </Box>
+                  </InputRightElement>
+                </InputGroup>
+              </FormControl>
+
+              <Button
+                type="submit"
+                colorScheme="red"
+                bgGradient="linear(to-r, yellow.400, red.500)"
+                color="white"
+                w="full"
+                _hover={{
+                  bgGradient: "linear(to-r, yellow.500, red.600)",
+                  boxShadow: "lg",
+                }}
+              >
+                Sign In
+              </Button>
+
+              <Text fontSize="sm" color="gray.600">
+                Don&apos;t have an account?{" "}
+                <Link
+                  as={RouterLink}
+                  to="/register"
+                  color="red.500"
+                  fontWeight="medium"
+                  _hover={{ textDecoration: "underline" }}
+                >
+                  Register
+                </Link>
+              </Text>
+            </VStack>
+          </Box>
+        </Box>
+      </Flex>
     </>
   );
 };

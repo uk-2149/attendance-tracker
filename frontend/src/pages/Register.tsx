@@ -17,6 +17,7 @@ import {
   Circle,
   Link,
   useToast,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { CheckSquare, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import axios from "axios";
@@ -35,21 +36,29 @@ const RegisterForm: React.FC<RegisterProps> = ({ setToken }) => {
   const [loading, setLoading] = useState(false);
 
   const toast = useToast();
-
   const apiUrl = import.meta.env.VITE_BACKEND_URL;
+  const headingSize = useBreakpointValue({ base: "xl", md: "2xl" });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast({
+        title: "Passwords do not match",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+        position: "bottom-right",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await axios.post<{ token: string }>(
         `${apiUrl}/api/auth/register`,
-        {
-          email,
-          password,
-        }
+        { email, password }
       );
-      console.log("API Response:", res.data);
       toast({
         title: "Registration Successful!",
         description: "Redirecting to dashboard...",
@@ -58,17 +67,15 @@ const RegisterForm: React.FC<RegisterProps> = ({ setToken }) => {
         isClosable: true,
         position: "bottom-right",
       });
-
       setTimeout(() => {
         setToken(res.data.token);
         localStorage.setItem("token", res.data.token);
       }, 3000);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
-        console.error(err.response.data);
         toast({
           title: "Error",
-          description: err.response.data.msg,
+          description: err.response.data.msg || "Registration failed.",
           status: "error",
           duration: 3000,
           isClosable: true,
@@ -85,150 +92,144 @@ const RegisterForm: React.FC<RegisterProps> = ({ setToken }) => {
   return (
     <>
       {loading && <Loader />}
-      {
-        <div className="w-full h-[100vh] flex align-center justify-center bg-amber-300">
-          <Box
-            w="full"
-            maxW="md"
-            borderRadius="lg"
-            overflow="hidden"
-            bg="white"
-            boxShadow="2xl"
-            h="fit-content"
-            m="auto"
-          >
-            {/*The top part*/}
-            <Box bg="#eb4034" p={6}>
-              <Flex direction="column" alignItems="center">
-                <Circle
-                  size="16"
-                  bg="white"
-                  mb="4"
-                  display="flex"
-                  alignItems="center"
-                  justifyItems="center"
-                >
-                  <Icon as={CheckSquare} boxSize={8} color="#eb4034" />
-                </Circle>
-              </Flex>
-              <Heading size="lg" color="white" textAlign="center">
+      <Flex
+        minH="100vh"
+        align="center"
+        justify="center"
+        bgGradient="linear(to-br, yellow.100, orange.100, red.100)"
+        px={4}
+      >
+        <Box
+          w="full"
+          maxW="md"
+          bg="white"
+          borderRadius="2xl"
+          boxShadow="2xl"
+          overflow="hidden"
+        >
+          {/* Header */}
+          <Box bgGradient="linear(to-r, yellow.400, red.500)" py={6} px={4}>
+            <Flex direction="column" align="center">
+              <Circle size="16" bg="white" mb={4}>
+                <Icon as={CheckSquare} boxSize={8} color="red.500" />
+              </Circle>
+              <Heading size={headingSize} color="white" textAlign="center">
                 Attendance Tracker
               </Heading>
-              <Text color="white" mt={2} textAlign="center">
-                Manage your attendance records
+              <Text color="whiteAlpha.900" mt={1} fontSize="sm" textAlign="center">
+                Join the smarter way to track your classes
               </Text>
-            </Box>
-            {/*top part ends*/}
-
-            {/*Form*/}
-            <Box as="form" onSubmit={handleSubmit} p={6}>
-              <VStack spacing={6}>
-                <FormControl>
-                  <FormLabel htmlFor="email">Email</FormLabel>
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <Icon as={Mail} color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="student@study.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </InputGroup>
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel htmlFor="password">Password</FormLabel>
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <Icon as={Lock} color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                    <InputRightElement>
-                      <Box
-                        as="button"
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        <Icon
-                          as={showPassword ? EyeOff : Eye}
-                          color="gray.800"
-                        />
-                      </Box>
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel>Confirm Password</FormLabel>
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <Icon as={Lock} color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                    />
-                    <InputRightElement>
-                      <Box
-                        as="button"
-                        type="button"
-                        onClick={() =>
-                          setShowConfirmPassword(!showConfirmPassword)
-                        }
-                      >
-                        <Icon
-                          as={showConfirmPassword ? EyeOff : Eye}
-                          color="gray.800"
-                        />
-                      </Box>
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
-
-                {/* {error && <Text color="red.500">{error}</Text>} */}
-
-                <Button
-                  type="submit"
-                  w="full"
-                  bg="#eb4034"
-                  color="white"
-                  _hover={{ bg: "#dc2626" }}
-                  isDisabled={password !== confirmPassword}
-                >
-                  Register
-                </Button>
-
-                <Text fontSize="sm" textAlign="center" color="gray.600">
-                  Already Registered?{" "}
-                  <Link
-                    as={RouterLink}
-                    to="/login"
-                    color="primary.500"
-                    fontWeight="medium"
-                    _hover={{ textDecoration: "underline" }}
-                  >
-                    Log in
-                  </Link>
-                </Text>
-              </VStack>
-            </Box>
+            </Flex>
           </Box>
-        </div>
-      }
+
+          {/* Form */}
+          <Box as="form" onSubmit={handleSubmit} py={8} px={6}>
+            <VStack spacing={5}>
+              <FormControl isRequired>
+                <FormLabel>Email</FormLabel>
+                <InputGroup>
+                  <InputLeftElement pointerEvents="none">
+                    <Icon as={Mail} color="gray.400" />
+                  </InputLeftElement>
+                  <Input
+                    type="email"
+                    placeholder="student@study.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </InputGroup>
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>Password</FormLabel>
+                <InputGroup>
+                  <InputLeftElement pointerEvents="none">
+                    <Icon as={Lock} color="gray.400" />
+                  </InputLeftElement>
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <InputRightElement>
+                    <Box
+                      as="button"
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      <Icon as={showPassword ? EyeOff : Eye} color="gray.600" />
+                    </Box>
+                  </InputRightElement>
+                </InputGroup>
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>Confirm Password</FormLabel>
+                <InputGroup>
+                  <InputLeftElement pointerEvents="none">
+                    <Icon as={Lock} color="gray.400" />
+                  </InputLeftElement>
+                  <Input
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  <InputRightElement>
+                    <Box
+                      as="button"
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                    >
+                      <Icon
+                        as={showConfirmPassword ? EyeOff : Eye}
+                        color="gray.600"
+                      />
+                    </Box>
+                  </InputRightElement>
+                </InputGroup>
+              </FormControl>
+
+              {password && confirmPassword && password !== confirmPassword && (
+                <Text color="red.500" fontSize="sm" mt={-2}>
+                  Passwords do not match.
+                </Text>
+              )}
+
+              <Button
+                type="submit"
+                colorScheme="red"
+                bgGradient="linear(to-r, yellow.400, red.500)"
+                color="white"
+                w="full"
+                isDisabled={!email || !password || password !== confirmPassword}
+                _hover={{
+                  bgGradient: "linear(to-r, yellow.500, red.600)",
+                  boxShadow: "lg",
+                }}
+              >
+                Register
+              </Button>
+
+              <Text fontSize="sm" color="gray.600">
+                Already registered?{" "}
+                <Link
+                  as={RouterLink}
+                  to="/login"
+                  color="red.500"
+                  fontWeight="medium"
+                  _hover={{ textDecoration: "underline" }}
+                >
+                  Log in
+                </Link>
+              </Text>
+            </VStack>
+          </Box>
+        </Box>
+      </Flex>
     </>
   );
 };

@@ -8,6 +8,7 @@ import {
 import LoginForm from "./pages/LoginForm";
 import RegisterForm from "./pages/Register";
 import Home from "./pages/Home";
+import Landing from "./pages/Landing";
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -20,17 +21,17 @@ const App = () => {
         <Route
           path="/login"
           element={
-            !token ? <LoginForm setToken={setToken} /> : <Navigate to="/" />
+            !token ? <LoginForm setToken={setToken} /> : <Navigate to="/home" />
           }
         />
         <Route
           path="/register"
           element={
-            !token ? <RegisterForm setToken={setToken} /> : <Navigate to="/" />
+            !token ? <RegisterForm setToken={setToken} /> : <Navigate to="/home" />
           }
         />
         <Route
-          path="/"
+          path="/home"
           element={
             token ? (
               <Home token={token} setToken={setToken} />
@@ -39,6 +40,7 @@ const App = () => {
             )
           }
         />
+        <Route path="/" element={<Landing />} />
       </Routes>
     </Router>
   );

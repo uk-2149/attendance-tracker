@@ -200,7 +200,7 @@ const SubjectCard: React.FC<SubjectCardProps> = ({
         </Text>
       </VStack>
 
-      <HStack mt={6} spacing={4} justify="center" wrap="wrap">
+      <HStack mt={6} spacing={4} justify="left" wrap="wrap">
         <Button
           leftIcon={<CheckCircleIcon />}
           colorScheme="green"
