@@ -3,18 +3,11 @@ import {
   CheckCircle,
   Calendar,
   BarChart3,
-  Clock,
-  Plus,
   Edit3,
-  Trash2,
   TrendingUp,
   Users,
   Target,
   ArrowRight,
-  Github,
-  Mail,
-  Phone,
-  LucideIcon,
 } from "lucide-react";
 import useIsMobile from "../hooks/isMobile";
 import FeatureCard from "../components/Landing/FeatureCard";
